@@ -81,11 +81,16 @@ const MODELS = [
 
 const money = (n) => "$" + n.toFixed(2);
 
+// Requests in flight at once, by plan. The free tier's rate limits are tight
+// enough that one-at-a-time is the difference between "works" and "429".
+const TIER_CONCURRENCY = { free: 1, paid: 2 };
+
 const $ = (id) => document.getElementById(id);
 const apiKeyEl = $("apiKey");
 const modelSelectEl = $("modelSelect");
 const modelCustomEl = $("modelCustom");
 const modelDetailEl = $("modelDetail");
+const tierEl = $("tier");
 const enabledEl = $("enabled");
 const revealEl = $("reveal");
 const testEl = $("test");
@@ -168,6 +173,12 @@ modelCustomEl.addEventListener("input", () => {
   saveResultEl.textContent = "";
 });
 
+tierEl.addEventListener("change", async () => {
+  await save();
+  const label = tierEl.value === "free" ? "1 at a time" : "2 at a time";
+  flash(saveResultEl, label, "ok");
+});
+
 revealEl.addEventListener("click", () => {
   const showing = apiKeyEl.type === "text";
   apiKeyEl.type = showing ? "password" : "text";
@@ -216,6 +227,7 @@ async function init() {
 
   apiKeyEl.value = ub_settings.apiKey || "";
   enabledEl.checked = ub_settings.enabled !== false;
+  tierEl.value = Number(ub_settings.maxConcurrent) === 1 ? "free" : "paid";
 
   const stored = ub_settings.model || DEFAULT_MODEL;
   if (MODELS.some((m) => m.id === stored)) {
@@ -232,6 +244,7 @@ async function save() {
     apiKey: apiKeyEl.value.trim(),
     model: effectiveModel() || DEFAULT_MODEL,
     enabled: enabledEl.checked,
+    maxConcurrent: TIER_CONCURRENCY[tierEl.value] || 2,
   };
   await chrome.storage.local.set({ ub_settings: settings });
 }

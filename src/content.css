@@ -102,6 +102,36 @@ html [data-ub-hidden] {
   border-left-color: #e0876a;
 }
 
+/* Error card: message plus a retry, side by side. */
+.ub-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ub-error-text {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.ub-retry {
+  flex: none;
+  padding: 2px 10px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ub-link);
+  background: transparent;
+  border: 1px solid var(--ub-border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.ub-retry:hover {
+  border-color: var(--ub-link);
+}
+
 /* ---------------------------------------------------------------------------
    Spinner
    --------------------------------------------------------------------------- */

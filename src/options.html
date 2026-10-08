@@ -55,6 +55,19 @@
       </section>
 
       <section class="card">
+        <label class="label" for="tier">Gemini plan</label>
+        <select id="tier">
+          <option value="free">Free tier — 1 request at a time</option>
+          <option value="paid">Paid tier — 2 requests at a time</option>
+        </select>
+        <p class="hint">
+          How many posts get summarized at once. The free tier has tighter rate limits, so
+          doing one at a time is the polite option; on a paid billing project, two keeps
+          the feed filling in faster.
+        </p>
+      </section>
+
+      <section class="card">
         <label class="switch">
           <input id="enabled" type="checkbox" />
           <span>Enabled on LinkedIn</span>

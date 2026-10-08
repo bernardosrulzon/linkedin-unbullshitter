@@ -18,7 +18,7 @@
   "use strict";
 
   const MIN_CHARS = 30; // below this there is nothing worth summarizing
-  const MAX_CONCURRENT = 2; // simultaneous Gemini requests
+  const DEFAULT_CONCURRENCY = 2; // simultaneous Gemini requests (paid tier)
   const SCAN_DEBOUNCE_MS = 400;
   const CACHE_MAX_ENTRIES = 800;
   const VIEWPORT_MARGIN = "400px 0px"; // start slightly before a post scrolls in
@@ -77,6 +77,7 @@
   let settings = { enabled: true, debug: true };
   let enabled = true;
   let blocked = false; // true once we learn there is no API key
+  let maxConcurrent = DEFAULT_CONCURRENCY; // 1 on the free tier, 2 on paid
   let observer = null;
   let viewport = null;
   let scanTimer = null;
@@ -125,6 +126,7 @@
       settings = { enabled: true, debug: true, ...(data.ub_settings || {}) };
       enabled = settings.enabled !== false;
       blocked = false;
+      maxConcurrent = clampConcurrency(settings.maxConcurrent);
 
       for (const [key, value] of Object.entries(data.ub_cache || {})) {
         cache.set(key, value);
@@ -168,10 +170,14 @@
     settings = { enabled: true, debug: true, ...next };
     enabled = settings.enabled !== false;
     blocked = false; // settings changed, give it another chance
+    maxConcurrent = clampConcurrency(settings.maxConcurrent);
 
     if (enabled && !wasEnabled) start();
     if (!enabled && wasEnabled) stop();
-    if (enabled && wasEnabled) scheduleScan();
+    if (enabled && wasEnabled) {
+      scheduleScan();
+      pump(); // a raised limit should drain the queue immediately
+    }
   });
 
   function start() {
@@ -358,6 +364,7 @@
     const refs = {
       key: cacheKeyFor(text, postRoot),
       anchor,
+      text,
       box: null,
       host: mount.host,
       original: mount.original,
@@ -460,8 +467,14 @@
       .trim();
   }
 
+  function clampConcurrency(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return DEFAULT_CONCURRENCY;
+    return Math.min(Math.max(Math.round(n), 1), 4);
+  }
+
   function pump() {
-    while (active < MAX_CONCURRENT && queue.length > 0) {
+    while (active < maxConcurrent && queue.length > 0) {
       const job = queue.shift();
       active++;
       process(job).finally(() => {
@@ -635,8 +648,42 @@
   function renderError(refs, message) {
     const box = getBox(refs);
     box.dataset.state = "error";
-    box.textContent = `Unbullshitter: ${message}`;
-    hideOriginal(refs, false);
+    box.dataset.ubTheme = pageTheme();
+    box.textContent = "";
+
+    const row = document.createElement("div");
+    row.className = "ub-error";
+
+    const text = document.createElement("span");
+    text.className = "ub-error-text";
+    text.textContent = `Unbullshitter: ${message}`;
+
+    const retry = document.createElement("button");
+    retry.type = "button";
+    retry.className = "ub-retry";
+    retry.textContent = "retry";
+    retry.addEventListener("click", () => retryJob(refs));
+
+    row.append(text, retry);
+    box.append(row);
+
+    if (refs.anchor) refs.anchor.dataset.ubState = "error";
+    hideOriginal(refs, false); // a failed summary shouldn't cost you the post
+  }
+
+  // Manual retry for whatever just died — rate limit, flaky wifi, a bad key the
+  // user has since fixed. No reload, no re-scroll.
+  function retryJob(refs) {
+    if (!enabled || !refs.text) return;
+
+    blocked = false; // they may have just pasted a working key
+    if (refs.anchor) delete refs.anchor.dataset.ubState;
+
+    renderLoading(refs);
+    if (refs.anchor) refs.anchor.dataset.ubState = "queued";
+
+    queue.push({ refs, text: refs.text });
+    pump();
   }
 
   function labelFor(result) {

@@ -108,6 +108,14 @@ Older models get `temperature` instead. The extension works out which config you
 
 ---
 
+## Patience vs. speed (and what to do when it dies)
+
+Settings has a **Gemini plan** switch. Free tier summarizes **one post at a time**; paid tier does **two**. The free tier's rate limits are tight enough that being polite is the difference between "works" and "429s all afternoon". If you're on a billing project, turn it up and the feed fills in twice as fast.
+
+And when a request does fall over — rate limit, flaky wifi, a key you pasted with a trailing space — the error card grows a **retry** button. It re-queues that one post, clears the "no key" lockout in case you just fixed it, and has another go. No reloading, no re-scrolling, and none of the dozen posts that were already fine get re-summarized.
+
+---
+
 ## When it breaks (it will)
 
 LinkedIn changes its markup the way other companies change their office plants: constantly, and without telling anyone. As of the 2026 server-driven UI rollout:
