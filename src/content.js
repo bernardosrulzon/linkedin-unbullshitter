@@ -18,6 +18,11 @@
   "use strict";
 
   const MIN_CHARS = 30; // below this there is nothing worth summarizing
+  // Below this much text we do not have enough to judge a post, so we never show
+  // it a substance verdict — see renderResult.
+  const MIN_TEXT_TO_GRADE = 140;
+  // Bumping this retires every cached verdict produced by an older prompt shape.
+  const CACHE_PREFIX = "c2:";
   const DEFAULT_CONCURRENCY = 1; // simultaneous Gemini requests (free tier default)
   const SCAN_DEBOUNCE_MS = 400;
   const CACHE_MAX_ENTRIES = 800;
@@ -130,7 +135,7 @@
       maxConcurrent = clampConcurrency(settings.maxConcurrent);
 
       for (const [key, value] of Object.entries(data.ub_cache || {})) {
-        cache.set(key, value);
+        if (key.startsWith(CACHE_PREFIX)) cache.set(key, value);
       }
 
       log("booted", { enabled, debug: settings.debug, cachedPosts: cache.size, url: location.pathname });
@@ -457,8 +462,7 @@
   // No stable post id exists in the 2026 DOM, so the text itself is the identity.
   function cacheKeyFor(text, postRoot) {
     const urn = postRoot?.getAttribute?.("data-urn");
-    if (urn) return urn;
-    return "h:" + hashText(text);
+    return CACHE_PREFIX + (urn || "h:" + hashText(text));
   }
 
   function hashText(value) {
@@ -623,9 +627,40 @@
 
   function renderResult(refs, result) {
     const box = getBox(refs);
-    box.dataset.state = result.short ? "short" : "done";
+
+    // Evidence rule. If we could barely read the post — a few words, or basically
+    // just a link — we have nothing to judge, so it never gets a substance
+    // verdict, whatever the model rated it. A summary is still shown when there
+    // is one; the grade is what we withhold.
+    const tooLittleToJudge =
+      (refs.text || "").length < MIN_TEXT_TO_GRADE || looksLikeJustALink(refs.text || "");
+
+    const hasSummary = Boolean((result.summary || "").trim());
+
+    let state = "done";
+    let summary = result.summary || "";
+    let grade = result.substance;
+
+    if (!hasSummary) {
+      // Nothing to summarise. Which wording is honest depends entirely on how
+      // much text there was: with a full post we read it and it said nothing;
+      // with a stub we simply cannot tell.
+      if (tooLittleToJudge) {
+        state = "short";
+        summary = "Short content — see original.";
+      } else {
+        summary = "Nothing of substance.";
+        grade = "none";
+      }
+    }
+
+    if (!grade || grade === "unknown") grade = null;
+    if (tooLittleToJudge) grade = null; // no evidence, no verdict
+
+    box.dataset.state = state;
     box.dataset.ubTheme = themeFor(refs.host);
-    box.dataset.substance = result.substance || "unknown";
+    if (grade) box.dataset.substance = grade;
+    else delete box.dataset.substance;
     box.textContent = "";
 
     const meta = document.createElement("div");
@@ -636,13 +671,13 @@
 
     const badge = document.createElement("span");
     badge.className = "ub-badge";
-    badge.textContent = labelFor(result);
+    badge.textContent = labelFor(result.kind, grade);
 
     meta.append(dot, badge);
 
     const text = document.createElement("div");
     text.className = "ub-text";
-    text.textContent = result.summary;
+    text.textContent = summary;
 
     const toggle = document.createElement("button");
     toggle.type = "button";
@@ -699,11 +734,19 @@
     pump();
   }
 
-  function labelFor(result) {
-    const kind = KIND_LABELS[result.kind] || "post";
-    if (result.short) return kind; // no grade — the content wasn't in the text
-    const substance = SUBSTANCE_LABELS[result.substance] || "";
-    return substance ? `${kind} · ${substance}` : kind;
+  function labelFor(kind, grade) {
+    const kindLabel = KIND_LABELS[kind] || "post";
+    if (!grade) return kindLabel; // nothing we can grade — don't imply a verdict
+    const substance = SUBSTANCE_LABELS[grade] || "";
+    return substance ? `${kindLabel} · ${substance}` : kindLabel;
+  }
+
+  // "Great read: <url>" is a link share, not a post. The URL inflates the length,
+  // so length alone wouldn't catch it — strip the links and see what prose is left.
+  function looksLikeJustALink(text) {
+    if (!/https?:\/\/\S+/i.test(text)) return false;
+    const prose = text.replace(/https?:\/\/\S+/gi, " ").replace(/\s+/g, " ").trim();
+    return prose.length < 40;
   }
 
   // -------------------------------------------------------------------------

@@ -22,13 +22,13 @@ const SCHEMA = {
     summary: {
       type: "string",
       description:
-        "The concrete point of the post in plain English, 140 characters or fewer. Use '<<EMPTY>>' when the author says nothing, or '<<SHORT>>' when the substance is plainly outside the text (a bare link, an image/video/carousel caption, a shared document, a poll).",
+        "The concrete point of the post in plain English, 140 characters or fewer. Return an empty string when the post genuinely carries no point.",
     },
     substance: {
       type: "string",
       enum: ["high", "medium", "low", "none"],
       description:
-        "How much real substance the post has, on a high bar. 'high' is rare: an original point of view or hard-won, specific insight. Generic advice, platitudes, filler and AI-generated prose are 'low'.",
+        "How much real substance the post has, on a high bar. 'high' is rare: an original point of view or hard-won, specific insight. Generic advice, platitudes, filler and AI-generated prose are 'low'. 'none' means the post contains no information at all — never use it just because a post is short, low-effort, or you are unsure. If you could write a summary, the grade is at least 'low'.",
     },
     kind: {
       type: "string",
@@ -69,17 +69,15 @@ The "summary" field:
 - If the post sells something, name what is being sold.
 - If the post is only a question, restate the actual question plainly.
 - Never make a thin post sound more substantial than it is. If there is barely a point, the summary should make that obvious.
-- Not everything is summarizable, and the two empty cases are different:
-  - "<<EMPTY>>" when the author wrote words but said nothing — filler, platitudes, motivational fluff, engagement bait. Set substance to "none".
-  - "<<SHORT>>" when the post's substance plainly lives somewhere you cannot read — a bare link, a caption for an image, video or carousel, a shared document or poll, or a one-liner that just points elsewhere. This is not a judgement about the post, so do not grade it: set summary to "<<SHORT>>".
-- Only reach for these when there is genuinely nothing to summarize. A short but complete claim ("rates cut 25bps") is a real summary, not "short".
+- If the post genuinely carries no point — the author wrote words and said nothing — return an empty string for the summary. Never invent a point, and never return placeholder text.
+- A short but complete claim ("rates cut 25bps") is a real summary, so write it. Only return empty when there is truly nothing.
 
 The "substance" field. This is a professional network, so the bar is high: most posts are "low" or "medium". Be stingy with "high".
 
 - "high" — Rare. A genuinely original point of view, a non-obvious insight, or hard-won first-hand detail a peer could not have got by scrolling. It teaches a professional something they did not already know, or reframes something they thought they did. Test: strip the company and industry names — if the point reads exactly the same without them, it is not high. A contrarian take qualifies only when it is backed by specifics.
 - "medium" — Real but ordinary: a competent observation, an expected update with some detail, or a claim that is thin on evidence. Specific enough to be useful, but not interesting. This is the default for a post that is neither obvious filler nor original.
 - "low" — Filler. Generic advice that would fit any job or industry, motivational platitudes, life lessons, humble-bravery, announcing something with no substance, consensus opinions dressed up as insight, engagement bait with a thin factual shell, and anything that reads as AI-generated. Test: could this have been written by someone who does not actually do the work? If yes, it is low.
-- "none" — Pure engagement bait, or no information at all.
+- "none" — the post contains no information at all. This is rare, and it is not the same as "short", "unimpressive" or "not my subject". If you were able to write a summary, the grade is at least "low".
 
 Signals of low substance: tidy list-shaped prose with balanced clauses and no real specifics; "it is not X, it is Y" constructions; a dramatic hook followed by an obvious payoff; borrowed authority with no first-hand detail; congratulating; reposting without adding anything.
 
@@ -283,24 +281,24 @@ function normalize(parsed, fallbackText) {
     .replace(/\s+/g, " ")
     .trim();
 
+  // An older prompt asked the model to signal these inside the summary field.
+  // Treat any straggler as "no summary": the wording that follows is decided from
+  // how much text there actually was, which is the only reliable evidence.
+  if (/^<?\s*<?\s*(EMPTY|SHORT)\s*>?\s*>?$/i.test(summary)) summary = "";
+
   let substance = VALID_SUBSTANCE.has(parsed?.substance) ? parsed.substance : "unknown";
-  let kind = VALID_KIND.has(parsed?.kind) ? parsed.kind : "other";
+  const kind = VALID_KIND.has(parsed?.kind) ? parsed.kind : "other";
 
-  // The substance is real but not in the text we can see (a bare link, an
-  // image/video/carousel caption, a shared document). Not a verdict — an apology.
-  const shortish = /^<?\s*<?\s*SHORT\s*>?\s*>?$/i.test(summary);
-  if (shortish) {
-    return { summary: "Short content — see original.", substance: "unknown", kind, short: true };
+  if (!summary) {
+    // Nothing to say. Whether that reads as "nothing of substance" or "short
+    // content" is not the model's call — it depends on how much text we had.
+    return { summary: "", substance: "none", kind };
   }
 
-  const emptyish = !summary || /^<?\s*<?\s*EMPTY\s*>?\s*>?$/i.test(summary);
-  if (emptyish || substance === "none") {
-    return {
-      summary: "Nothing of substance.",
-      substance: "none",
-      kind: kind === "other" ? "engagement_bait" : kind,
-    };
-  }
+  // A summary exists, so there IS something there. "none" would contradict the
+  // sentence we just wrote, and the model over-applies it to anything it finds
+  // unimpressive. Never throw away a summary over a grade.
+  if (substance === "none") substance = "low";
 
   if (summary.length > MAX_SUMMARY_CHARS) {
     summary = summary.slice(0, MAX_SUMMARY_CHARS - 1).trimEnd() + "…";
