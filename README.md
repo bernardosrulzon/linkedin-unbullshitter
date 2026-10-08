@@ -79,7 +79,7 @@ On Google's free tier, your input may be used to improve their products. If you'
 
 LinkedIn rearranges its website constantly, and one day it'll rearrange the part this reads. You'll notice immediately: posts stop shrinking.
 
-Click the toolbar icon for a quick health check — posts found, comments skipped, summaries served, last error.
+Click the toolbar icon — it tells you in one line whether it's working, and if it isn't, what to try. (There's a **Technical details** section for bug reports.)
 
 ## Fine print
 

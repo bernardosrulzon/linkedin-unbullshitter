@@ -16,10 +16,20 @@ h1 {
   font-size: 15px;
 }
 
-.sub {
-  margin: 3px 0 16px;
+/* The one line an end user actually reads. */
+.status {
+  margin: 4px 0 16px;
   font-size: 12px;
+  line-height: 1.4;
   color: #6b7c8a;
+}
+
+.status[data-tone="ok"] {
+  color: #0a7a43;
+}
+
+.status[data-tone="bad"] {
+  color: #a13030;
 }
 
 .switch {
@@ -65,34 +75,35 @@ button.ghost:hover {
   flex: 1;
 }
 
-.diag {
-  background: #f4f6f8;
-  border: 1px solid #e2e8ec;
-  border-radius: 8px;
-  padding: 10px 12px;
+/* Counters live behind a disclosure, for bug reports rather than daily use. */
+.tech {
   margin-bottom: 14px;
+  font-size: 11px;
 }
 
-.diag-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
+.tech > summary {
+  cursor: pointer;
+  list-style: none;
+  color: #6b7c8a;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #6b7c8a;
-  margin-bottom: 8px;
 }
 
-button.mini {
-  padding: 2px 8px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #0a66c2;
-  background: none;
-  border: none;
-  cursor: pointer;
+.tech > summary::-webkit-details-marker {
+  display: none;
+}
+
+.tech > summary::before {
+  content: "▸ ";
+}
+
+.tech[open] > summary::before {
+  content: "▾ ";
+}
+
+.tech[open] > summary {
+  margin-bottom: 8px;
 }
 
 .diag-grid {
@@ -115,27 +126,24 @@ button.mini {
   font-weight: 600;
 }
 
-.diag-error {
-  margin: 8px 0 0;
-  font-size: 12px;
-  line-height: 1.4;
-  color: #6b7c8a;
-}
-
-.diag-error[data-tone="bad"] {
-  color: #a13030;
-}
-
-.diag-error[data-tone="ok"] {
-  color: #0a7a43;
-}
-
 @media (prefers-color-scheme: dark) {
   body {
     background: #1b2226;
     color: #e6eaed;
   }
-  .sub {
+  .status {
+    color: #9aa8b2;
+  }
+  .status[data-tone="ok"] {
+    color: #5cbf8f;
+  }
+  .status[data-tone="bad"] {
+    color: #e0876a;
+  }
+  .tech > summary {
+    color: #9aa8b2;
+  }
+  .diag-grid dt {
     color: #9aa8b2;
   }
   button.link,
@@ -146,18 +154,5 @@ button.mini {
   button.link:hover,
   button.ghost:hover {
     background: #2c363c;
-  }
-  button.mini {
-    color: #6cb2f0;
-  }
-  .diag {
-    background: #171d20;
-    border-color: #2e3a40;
-  }
-  .diag-head {
-    color: #9aa8b2;
-  }
-  .diag-grid dt {
-    color: #9aa8b2;
   }
 }
