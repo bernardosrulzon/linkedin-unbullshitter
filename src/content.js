@@ -420,18 +420,30 @@
     refs.host.setAttribute("data-ub-host", "1");
   }
 
-  // Follow LinkedIn's own theme rather than the OS preference — the two can
-  // disagree, and that mismatch is what makes the card clash with the page.
-  // LinkedIn marks its theme with a theme--light / theme--dark class.
-  function pageTheme() {
-    const root = document.documentElement;
-    if (root.classList.contains("theme--dark")) return "dark";
-    if (root.classList.contains("theme--light")) return "light";
-
-    const marked = document.querySelector(".theme--dark, .theme--light");
-    if (marked) return marked.classList.contains("theme--dark") ? "dark" : "light";
-
+  // Decide light/dark from the page itself, not from the OS preference.
+  //
+  // LinkedIn renders a dark top bar even on a light feed, and its theme--* markers
+  // shift around as the app hydrates. Sniffing classes (or taking the first marker
+  // in document order) therefore answers "dark" early and "light" later — which is
+  // exactly the "dark loading card on a light feed" bug. Measuring the real
+  // background behind the card is ground truth and cannot drift.
+  function themeFor(el) {
+    for (let node = el || document.body; node; node = node.parentElement) {
+      const bg = parseColor(getComputedStyle(node).backgroundColor);
+      if (bg && bg.a >= 0.5) return luminance(bg) < 0.5 ? "dark" : "light";
+    }
     return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
+  }
+
+  function parseColor(value) {
+    const match = /rgba?\(([^)]+)\)/.exec(value || "");
+    if (!match) return null;
+    const [r, g, b, a = 1] = match[1].split(",").map(Number);
+    return { r, g, b, a };
+  }
+
+  function luminance({ r, g, b }) {
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
   }
 
   function findSeeMore(postRoot) {
@@ -562,7 +574,7 @@
     }
 
     refs.box = box;
-    box.dataset.ubTheme = pageTheme();
+    box.dataset.ubTheme = themeFor(refs.host);
     return box;
   }
 
@@ -591,7 +603,7 @@
   function renderLoading(refs) {
     const box = getBox(refs);
     box.dataset.state = "loading";
-    box.dataset.ubTheme = pageTheme();
+    box.dataset.ubTheme = themeFor(refs.host);
     box.textContent = "";
 
     const row = document.createElement("div");
@@ -612,7 +624,7 @@
   function renderResult(refs, result) {
     const box = getBox(refs);
     box.dataset.state = "done";
-    box.dataset.ubTheme = pageTheme();
+    box.dataset.ubTheme = themeFor(refs.host);
     box.dataset.substance = result.substance || "unknown";
     box.textContent = "";
 
@@ -649,7 +661,7 @@
   function renderError(refs, message) {
     const box = getBox(refs);
     box.dataset.state = "error";
-    box.dataset.ubTheme = pageTheme();
+    box.dataset.ubTheme = themeFor(refs.host);
     box.textContent = "";
 
     const row = document.createElement("div");
