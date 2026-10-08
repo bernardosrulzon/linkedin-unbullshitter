@@ -22,13 +22,13 @@ const SCHEMA = {
     summary: {
       type: "string",
       description:
-        "The concrete point of the post in plain English, 140 characters or fewer. Return an empty string when the post genuinely carries no point.",
+        "The concrete point of the post, in the same language as the post, 140 characters or fewer. Return an empty string when the post genuinely carries no point.",
     },
     substance: {
       type: "string",
       enum: ["high", "medium", "low", "none"],
       description:
-        "How much real substance the post has, on a high bar. 'high' is rare: an original point of view or hard-won, specific insight. Generic advice, platitudes, filler and AI-generated prose are 'low'. 'none' means the post contains no information at all — never use it just because a post is short, low-effort, or you are unsure. If you could write a summary, the grade is at least 'low'.",
+        "How much real substance the post has. 'high' is for unique and relevant posts: an original point of view, non-obvious insight, or concrete reporting like interview takeaways. Generic advice, platitudes, filler and AI-generated prose are 'low'. 'none' means the post contains no information at all — never use it just because a post is short, low-effort, or you are unsure. If you could write a summary, the grade is at least 'low'.",
     },
     kind: {
       type: "string",
@@ -72,9 +72,9 @@ The "summary" field:
 - If the post genuinely carries no point — the author wrote words and said nothing — return an empty string for the summary. Never invent a point, and never return placeholder text.
 - A short but complete claim ("rates cut 25bps") is a real summary, so write it. Only return empty when there is truly nothing.
 
-The "substance" field. This is a professional network, so the bar is high: most posts are "low" or "medium". Be stingy with "high".
+The "substance" field. This is a professional network, so generic filler is "low". But "high" should be earned, not rare — unique and relevant posts qualify.
 
-- "high" — Rare. A genuinely original point of view, a non-obvious insight, or hard-won first-hand detail a peer could not have got by scrolling. It teaches a professional something they did not already know, or reframes something they thought they did. Test: strip the company and industry names — if the point reads exactly the same without them, it is not high. A contrarian take qualifies only when it is backed by specifics.
+- "high" — Worth a professional's time. An original point of view, a non-obvious insight, hard-won first-hand detail, or unique relevant reporting a peer could not have got by scrolling: interview takeaways, conversation summaries, event notes, teardowns with concrete specifics (names, numbers, decisions, quotes, trade-offs). It teaches something, reframes something, or captures something that would otherwise be missed. Generic advice that reads the same with the names stripped out is not high; concrete specifics push toward high.
 - "medium" — Real but ordinary: a competent observation, an expected update with some detail, or a claim that is thin on evidence. Specific enough to be useful, but not interesting. This is the default for a post that is neither obvious filler nor original.
 - "low" — Filler. Generic advice that would fit any job or industry, motivational platitudes, life lessons, humble-bravery, announcing something with no substance, consensus opinions dressed up as insight, engagement bait with a thin factual shell, and anything that reads as AI-generated. Test: could this have been written by someone who does not actually do the work? If yes, it is low.
 - "none" — the post contains no information at all. This is rare, and it is not the same as "short", "unimpressive" or "not my subject". If you were able to write a summary, the grade is at least "low".
@@ -139,7 +139,9 @@ async function getSettings() {
 async function summarize(rawText) {
   const text = String(rawText || "").trim().slice(0, MAX_TEXT_CHARS);
   if (text.length < 20) {
-    return { summary: "Nothing of substance.", substance: "none", kind: "other" };
+    // Too little to judge — return empty and let the renderer decide the
+    // wording from how much text there was. Never a substance verdict here.
+    return { summary: "", substance: "none", kind: "other" };
   }
 
   const { apiKey, model } = await getSettings();

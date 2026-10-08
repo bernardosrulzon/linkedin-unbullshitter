@@ -743,9 +743,16 @@
 
   // "Great read: <url>" is a link share, not a post. The URL inflates the length,
   // so length alone wouldn't catch it — strip the links and see what prose is left.
+  // Matches full URLs and bare domains (lnkd.in/..., bit.ly/..., www.x.com, x.com/y).
   function looksLikeJustALink(text) {
-    if (!/https?:\/\/\S+/i.test(text)) return false;
-    const prose = text.replace(/https?:\/\/\S+/gi, " ").replace(/\s+/g, " ").trim();
+    const urlPattern = /https?:\/\/\S+|www\.[^\s]+|[a-z0-9-]+\.[a-z]{2,}\/\S*/i;
+    if (!urlPattern.test(text)) return false;
+    const prose = text
+      .replace(/https?:\/\/\S+/gi, " ")
+      .replace(/www\.[^\s]+/gi, " ")
+      .replace(/[a-z0-9-]+\.[a-z]{2,}\/\S*/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
     return prose.length < 40;
   }
 
