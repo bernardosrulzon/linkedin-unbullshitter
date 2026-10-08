@@ -35,6 +35,7 @@ const SCHEMA = {
       enum: [
         "insight",
         "story",
+        "personal",
         "announcement",
         "hiring",
         "promo",
@@ -81,7 +82,18 @@ Signals of low substance: tidy list-shaped prose with balanced clauses and no re
 
 When you are torn between two levels, choose the lower one.
 
-The "kind" field: pick the single best match from the allowed values.
+The "kind" field — the dominant type of post. When two seem to fit, use this order of precedence:
+
+1. "promo" — selling a product, service, course, or the author's own offering.
+2. "hiring" — a job opening or a recruiting call to action.
+3. "personal" — the author sharing their own life or career, not a professional argument: a new role, a promotion, an award, a work anniversary, a milestone, a conference or event they attended, congratulations, travel, a personal photo, a reflection about themselves. Personal news goes here even when it is also an announcement.
+4. "news" — reporting something that happened in the industry, a company, or the world.
+5. "announcement" — an organisation, team or product announcing something, where the author is not the news.
+6. "insight" — the author making an argument, an analysis, or stating a point of view.
+7. "story" — a narrative told to make a point.
+8. "question" — the post is mostly asking the reader something.
+9. "engagement_bait" — no real content, just a prompt for reactions.
+10. "other" — none of the above.
 
 Respond with JSON only.`;
 
@@ -249,6 +261,7 @@ const VALID_SUBSTANCE = new Set(["high", "medium", "low", "none"]);
 const VALID_KIND = new Set([
   "insight",
   "story",
+  "personal",
   "announcement",
   "hiring",
   "promo",

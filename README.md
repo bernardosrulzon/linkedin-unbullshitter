@@ -18,6 +18,7 @@ A real post? You get the point. Pure bait? It says so, and shows you nothing els
 | --- | --- |
 | `insight · high substance` | Actually useful. |
 | `announcement · some substance` | A thing happened. |
+| `personal · low substance` | Someone's personal news. Good for them. |
 | `story · low substance` | A story with no point. |
 | `engagement bait · no substance` | "Agree?" — No. |
 

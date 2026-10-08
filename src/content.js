@@ -53,6 +53,7 @@
   const KIND_LABELS = {
     insight: "insight",
     story: "story",
+    personal: "personal",
     announcement: "announcement",
     hiring: "hiring",
     promo: "promo",
