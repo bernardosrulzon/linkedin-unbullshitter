@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "LinkedIn Unbullshitter",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Replaces LinkedIn posts with a ruthless 140-character summary. Keeps the facts, drops the bullshit.",
   "icons": {
     "16": "icons/icon16.png",

@@ -91,6 +91,12 @@ html [data-ub-hidden] {
   font-style: italic;
 }
 
+/* The substance lives outside the text (a link, an image, a video). This is not
+   a verdict, so it reads as a neutral note rather than a grade. */
+.ub-summary[data-state="short"] {
+  color: var(--ub-muted);
+}
+
 .ub-summary[data-state="error"] {
   color: #b24020;
   border-left-color: #b24020;

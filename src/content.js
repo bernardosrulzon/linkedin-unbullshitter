@@ -623,7 +623,7 @@
 
   function renderResult(refs, result) {
     const box = getBox(refs);
-    box.dataset.state = "done";
+    box.dataset.state = result.short ? "short" : "done";
     box.dataset.ubTheme = themeFor(refs.host);
     box.dataset.substance = result.substance || "unknown";
     box.textContent = "";
@@ -701,6 +701,7 @@
 
   function labelFor(result) {
     const kind = KIND_LABELS[result.kind] || "post";
+    if (result.short) return kind; // no grade — the content wasn't in the text
     const substance = SUBSTANCE_LABELS[result.substance] || "";
     return substance ? `${kind} · ${substance}` : kind;
   }

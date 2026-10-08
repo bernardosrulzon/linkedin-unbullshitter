@@ -22,7 +22,7 @@ const SCHEMA = {
     summary: {
       type: "string",
       description:
-        "The concrete point of the post in plain English, 140 characters or fewer. Use '<<EMPTY>>' when the post carries no real information.",
+        "The concrete point of the post in plain English, 140 characters or fewer. Use '<<EMPTY>>' when the author says nothing, or '<<SHORT>>' when the substance is plainly outside the text (a bare link, an image/video/carousel caption, a shared document, a poll).",
     },
     substance: {
       type: "string",
@@ -69,7 +69,10 @@ The "summary" field:
 - If the post sells something, name what is being sold.
 - If the post is only a question, restate the actual question plainly.
 - Never make a thin post sound more substantial than it is. If there is barely a point, the summary should make that obvious.
-- If there is no real information at all, set summary to "<<EMPTY>>" and substance to "none".
+- Not everything is summarizable, and the two empty cases are different:
+  - "<<EMPTY>>" when the author wrote words but said nothing — filler, platitudes, motivational fluff, engagement bait. Set substance to "none".
+  - "<<SHORT>>" when the post's substance plainly lives somewhere you cannot read — a bare link, a caption for an image, video or carousel, a shared document or poll, or a one-liner that just points elsewhere. This is not a judgement about the post, so do not grade it: set summary to "<<SHORT>>".
+- Only reach for these when there is genuinely nothing to summarize. A short but complete claim ("rates cut 25bps") is a real summary, not "short".
 
 The "substance" field. This is a professional network, so the bar is high: most posts are "low" or "medium". Be stingy with "high".
 
@@ -282,6 +285,13 @@ function normalize(parsed, fallbackText) {
 
   let substance = VALID_SUBSTANCE.has(parsed?.substance) ? parsed.substance : "unknown";
   let kind = VALID_KIND.has(parsed?.kind) ? parsed.kind : "other";
+
+  // The substance is real but not in the text we can see (a bare link, an
+  // image/video/carousel caption, a shared document). Not a verdict — an apology.
+  const shortish = /^<?\s*<?\s*SHORT\s*>?\s*>?$/i.test(summary);
+  if (shortish) {
+    return { summary: "Short content — see original.", substance: "unknown", kind, short: true };
+  }
 
   const emptyish = !summary || /^<?\s*<?\s*EMPTY\s*>?\s*>?$/i.test(summary);
   if (emptyish || substance === "none") {
