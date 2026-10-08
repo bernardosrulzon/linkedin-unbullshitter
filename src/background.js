@@ -27,7 +27,8 @@ const SCHEMA = {
     substance: {
       type: "string",
       enum: ["high", "medium", "low", "none"],
-      description: "How much real, useful information the post actually contains.",
+      description:
+        "How much real substance the post has, on a high bar. 'high' is rare: an original point of view or hard-won, specific insight. Generic advice, platitudes, filler and AI-generated prose are 'low'.",
     },
     kind: {
       type: "string",
@@ -66,9 +67,19 @@ The "summary" field:
 - If the post tells a story, give the outcome, not the suspense.
 - If the post sells something, name what is being sold.
 - If the post is only a question, restate the actual question plainly.
+- Never make a thin post sound more substantial than it is. If there is barely a point, the summary should make that obvious.
 - If there is no real information at all, set summary to "<<EMPTY>>" and substance to "none".
 
-The "substance" field: "high" (concrete, novel, useful), "medium" (some real content), "low" (mostly padding), "none" (pure bait, no information).
+The "substance" field. This is a professional network, so the bar is high: most posts are "low" or "medium". Be stingy with "high".
+
+- "high" — Rare. A genuinely original point of view, a non-obvious insight, or hard-won first-hand detail a peer could not have got by scrolling. It teaches a professional something they did not already know, or reframes something they thought they did. Test: strip the company and industry names — if the point reads exactly the same without them, it is not high. A contrarian take qualifies only when it is backed by specifics.
+- "medium" — Real but ordinary: a competent observation, an expected update with some detail, or a claim that is thin on evidence. Specific enough to be useful, but not interesting. This is the default for a post that is neither obvious filler nor original.
+- "low" — Filler. Generic advice that would fit any job or industry, motivational platitudes, life lessons, humble-bravery, announcing something with no substance, consensus opinions dressed up as insight, engagement bait with a thin factual shell, and anything that reads as AI-generated. Test: could this have been written by someone who does not actually do the work? If yes, it is low.
+- "none" — Pure engagement bait, or no information at all.
+
+Signals of low substance: tidy list-shaped prose with balanced clauses and no real specifics; "it is not X, it is Y" constructions; a dramatic hook followed by an obvious payoff; borrowed authority with no first-hand detail; congratulating; reposting without adding anything.
+
+When you are torn between two levels, choose the lower one.
 
 The "kind" field: pick the single best match from the allowed values.
 
