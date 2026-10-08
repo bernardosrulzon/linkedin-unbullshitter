@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="icons/logo.png" width="128" alt="Unbullshitter" />
+
 # Unbullshitter
 
 **Your LinkedIn feed, with the waffle removed.**
