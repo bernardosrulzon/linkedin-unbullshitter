@@ -2,157 +2,87 @@
 
 # Unbullshitter
 
-**Your LinkedIn feed, but the posts are 140 characters of whatever they were actually trying to say.**
-
-*No server. No build step. No npm install. No 400MB of node_modules to achieve it.*
+**Your LinkedIn feed, with the waffle removed.**
 
 </div>
 
 ---
 
-## The pitch
+LinkedIn is the one place where a person can write six paragraphs and say nothing — and get applauded for it. Unbullshitter reads each post, asks Google's Gemini "so what?", and replaces the whole thing with a one-line summary and an honest verdict.
 
-LinkedIn is the only place on the internet where someone can write six paragraphs and say nothing at all, and be *rewarded* for it. "I got rejected 47 times, then I remembered my grandfather's words." Cool. What did you actually do?
+A real post? You get the point. Pure bait? It says so, and shows you nothing else.
 
-Unbullshitter reads each post, asks Google's Gemini "so… what's the news?", and swaps the whole thing for a one-line summary plus a verdict. If the post was pure engagement bait, it will tell you that, in so many words, and then *show you nothing else*, because there was nothing else.
-
-Every card gets a badge:
-
-| You'll see | It means |
+| The badge | What it means |
 | --- | --- |
-| `insight · high substance` | Genuinely useful. Screenshot it before it scrolls away. |
-| `announcement · some substance` | A thing happened. You now know what. |
-| `story · low substance` | There's a plot, but no point. |
-| `engagement bait · no substance` | "Agree?" No. |
+| `insight · high substance` | Actually useful. |
+| `announcement · some substance` | A thing happened. |
+| `story · low substance` | A story with no point. |
+| `engagement bait · no substance` | "Agree?" — No. |
 
-Each post gets a **show the original** link, in case you want to read the version where it took eleven sentences.
+## Install (5 minutes, no coding required)
 
----
+**1. Download it**
 
-## Install (five minutes, and most of it is Google's fault)
+Click the green **Code** button at the top of this page → **Download ZIP**. Unzip it somewhere you'll remember (the Desktop is fine).
 
-### 1. Get the code onto your machine
+**2. Add it to Chrome**
 
-```bash
-git clone git@github.com:bernardosrulzon/unbullshitter.git
-```
+1. Open a new tab and type `chrome://extensions`
+2. Turn on **Developer mode** — the switch in the top-right corner
+3. Click **Load unpacked** and select the folder you unzipped
 
-Any folder works. No install step. I'm serious. There is no install step.
+Chrome will warn you about developer-mode extensions. That's normal — it just hasn't met this one yet.
 
-### 2. Load it into Chrome
+Can't see the icon afterwards? Click the puzzle-piece icon in your toolbar and pin **Unbullshitter**.
 
-1. Open `chrome://extensions`
-2. Flip on **Developer mode** (top-right toggle). Congratulations, you are now a developer.
-3. Click **Load unpacked** and pick the folder you just cloned.
+**3. Get a free Gemini key**
 
-If Chrome warns you about extensions in developer mode, that's just Chrome doing its job. It doesn't know you yet.
+1. Go to [aistudio.google.com/apikey](https://aistudio.google.com/apikey)
+2. Sign in, click **Create API key**, and copy it
 
-### 3. Get a Gemini API key (free)
+It's free, and the free quota is more than you'll ever use scrolling LinkedIn.
 
-1. Go to **[aistudio.google.com/apikey](https://aistudio.google.com/apikey)**
-2. Sign in, click **Create API key**, copy it.
-3. It's free. The free tier is far more than a human scrolling LinkedIn will ever use.
+**4. Connect the two**
 
-Fair warning: on the **free tier, Google may use your inputs to improve its products.** If you'd rather it didn't, flip the API key to a paid billing project — paid-tier inputs are not used for training. Either way, the posts you read are getting sent to Google, which is a sentence worth reading twice.
+1. Click the **Unbullshitter** icon → **Settings**
+2. Paste your key and click **Test connection** — it'll tell you if it works
+3. That's it. The default model is fine.
 
-### 4. Plug it in
+**5. Open your feed**
 
-1. Click the Unbullshitter icon in your toolbar → **Settings**
-2. Paste the key, hit **Test connection** (it'll tell you if your model name is real)
-3. Pick a model from the dropdown — each one shows its price per million tokens so you can be cheap on purpose
+Go to [linkedin.com/feed](https://www.linkedin.com/feed) and scroll.
 
-### 5. Open your feed
+## Try it
 
-Go to [linkedin.com/feed](https://www.linkedin.com/feed). Scroll. Enjoy the quiet.
+- **Scroll** — posts turn into short summaries as they reach your screen. Posts further down wait until you get to them.
+- **Show the original** — one click on any card. Click again to hide it.
+- **Turn it off** — toolbar icon → toggle. Your feed comes back instantly.
+- **Something didn't load?** — press the **retry** button on the card.
 
----
+## Changing how it works
 
-## How it actually works
+Toolbar icon → **Settings**. There are only two things worth touching:
 
-```
-LinkedIn tab (content script)
-  ├─ finds post cards in LinkedIn's obfuscated DOM
-  ├─ pulls the post text, ignores comments (they're not the enemy here)
-  ├─ only summarizes what scrolls near your eyeballs
-  ├─ queue (max 2 at once) + cache keyed by a hash of the text
-  └─ hands the text to the background worker
-        └─ POST generativelanguage.googleapis.com   ← no CORS, host permission
-              └─ structured JSON back: { summary, substance, kind }
-                    └─ swaps the post for a one-line card
-```
+- **Model** — the default is cheap and does this job well. Fancier models cost more and aren't noticeably better here.
+- **Free vs paid** — *Free tier* handles one post at a time, *Paid tier* two. Free is the default, and it's fine.
 
-The bits that matter:
+## What leaves your computer
 
-- **It's not a scraper.** It reads what's already rendered on your screen, in your own logged-in tab. It doesn't log in anywhere, doesn't hit LinkedIn's API, doesn't phone home. The only network request it makes is to Google, with the post text.
-- **Comments are excluded.** A comment is structurally different from a post (nested list item, or living under a subtree whose hooks say "comment"), and both signals are checked.
-- **You get billed once per post, ever.** There's no stable post id in LinkedIn's 2026 markup, so the cache key is a hash of the post text. Scroll away, scroll back, reload the tab — it serves the stored summary. No second API call.
-- **Only visible posts cost money.** An `IntersectionObserver` fires when a card approaches the viewport. The 400 posts you never scrolled to never get summarized.
-- **The answer is JSON, not prose.** The API is called with a `responseSchema`, so we never have to strip a "Sure, here's a summary!" preamble. We ask for three fields and get three fields.
-- **Updates survive React.** LinkedIn rebuilds its DOM constantly and wipes any `class` or inline `style` you dared to add. So hiding and mounting are done with `data-*` attributes, which React doesn't touch. That was a fun afternoon.
+Just the text of the post being summarized, sent to Google's Gemini API. That's the entire job — no server in the middle, no analytics, no account, no tracking.
 
----
+On Google's free tier, your input may be used to improve their products. If you'd rather it weren't, use a paid API key.
 
-## Tuning the filter
+## If posts stop being summarized
 
-The prompt lives in `src/background.js`, in a variable called `SYSTEM_PROMPT`. This is the actual product. The code is plumbing; the prompt is the opinion.
+LinkedIn rearranges its website constantly, and one day it'll rearrange the part this reads. You'll notice immediately: posts stop shrinking.
 
-If summaries are too soft, don't write "be more concise" — the model will ignore you. **Name the specific failure mode you keep seeing** and add it to the CUT list. "CUT: humble-bravery framing, 'I was rejected X times', vague lessons about leadership." Named patterns work. Adjectives don't.
+Click the toolbar icon for a quick health check — posts found, comments skipped, summaries served, last error.
 
-## Models and money
+## Fine print
 
-Pick from the dropdown in Settings. Each entry shows standard paid-tier pricing per 1M tokens and whether it's on the free tier. Default is `gemini-3.5-flash-lite` — the cheapest thing in the list and, for a job that's basically "read this and get to the point," entirely sufficient. You'd be paying roughly ten times more on `gemini-3.8-flash` for a marginal gain in wit.
+- It only reads what's already on your screen, in your own logged-in browser. No scraping, no server, nothing logged in on your behalf.
+- Comments are never touched. Only posts.
+- Summaries are cached, so scrolling back up (or reloading) costs nothing.
+- Nothing is deleted. The original post is still in the page, hidden behind a **data attribute** — flip the toggle and it's back.
 
-Want to spend more anyway? The Pro models are in the list, priced accordingly. Summarizing 140 characters is not a reasoning-heavy task, so the extension tells Gemini 3.x to think at `thinkingLevel: "low"`. Thinking tokens are billed as output tokens, and we're not paying the model to ponder your feed.
-
-Older models get `temperature` instead. The extension works out which config your model wants; if it guesses wrong, it drops the offending field and retries.
-
----
-
-## Patience vs. speed (and what to do when it dies)
-
-Settings has a **Gemini plan** switch, and it defaults to the cautious end: **free tier, one post at a time**. Paid tier bumps it to two. The free tier's rate limits are tight enough that being polite is the difference between "works" and "429s all afternoon". If you're on a billing project, turn it up and the feed fills in twice as fast.
-
-And when a request does fall over — rate limit, flaky wifi, a key you pasted with a trailing space — the error card grows a **retry** button. It re-queues that one post, clears the "no key" lockout in case you just fixed it, and has another go. No reloading, no re-scrolling, and none of the dozen posts that were already fine get re-summarized.
-
----
-
-## When it breaks (it will)
-
-LinkedIn changes its markup the way other companies change their office plants: constantly, and without telling anyone. As of the 2026 server-driven UI rollout:
-
-- posts have **no `data-urn`** anymore,
-- class names are obfuscated into `ebu*` gibberish,
-- post text lives in `span[data-testid="expandable-text-box"]`.
-
-If posts stop being summarized, the first thing to check is `TEXT_SELECTORS` in `src/content.js`. LinkedIn moved the furniture; you move the selector. That's the whole maintenance story.
-
-Open the DevTools console and look for `[UB]` logs — the extension narrates what it's doing. The toolbar popup also has a diagnostics panel: posts found, comments skipped, summaries served from cache, last error.
-
----
-
-## Files
-
-| File | What's in it |
-| --- | --- |
-| `manifest.json` | MV3 manifest. Two permissions, one host, no drama. |
-| `src/background.js` | Talks to Gemini. Holds the prompt, retries, and the JSON schema. |
-| `src/content.js` | Finds posts, extracts text, queues, caches, renders, hides originals. |
-| `src/content.css` | The card, in LinkedIn's own colors, in light and dark. |
-| `src/options.*` | Where you paste the key and pick a model. |
-| `src/popup.*` | Toolbar toggle and the diagnostics panel. |
-
----
-
-## FAQ
-
-**Does this send my data anywhere creepy?**
-It sends post text to Google's Gemini API. That's the entire business model of a summarizer. There's no server in the middle, no analytics, no telemetry, no "anonymous usage statistics."
-
-**It says "no substance" but the post had substance.**
-The model only sees the text, not the link it points to, the author, or the engagement. "We published our results, link below" looks thin to a model that can't click. Also, sometimes the model is just wrong. It's a language model, not a judge.
-
-**Can I turn it off?**
-Toolbar icon → toggle. Originals come back instantly. It's a class attribute; nothing was ever destroyed.
-
-**Why "Unbullshitter"?**
-Because "LinkedIn Feed Optimization Suite" doesn't have the same ring to it.
+Not affiliated with LinkedIn. Built for personal use.
