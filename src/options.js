@@ -1,6 +1,6 @@
 // LinkedIn Unbullshitter — options page.
 
-const DEFAULT_MODEL = "gemini-3.8-flash";
+const DEFAULT_MODEL = "gemini-3.5-flash-lite";
 const CUSTOM = "__custom__";
 
 // Standard paid-tier prices in USD per 1M tokens, plus free-tier availability.
@@ -227,7 +227,7 @@ async function init() {
 
   apiKeyEl.value = ub_settings.apiKey || "";
   enabledEl.checked = ub_settings.enabled !== false;
-  tierEl.value = Number(ub_settings.maxConcurrent) === 1 ? "free" : "paid";
+  tierEl.value = Number(ub_settings.maxConcurrent) === 2 ? "paid" : "free";
 
   const stored = ub_settings.model || DEFAULT_MODEL;
   if (MODELS.some((m) => m.id === stored)) {
@@ -244,7 +244,7 @@ async function save() {
     apiKey: apiKeyEl.value.trim(),
     model: effectiveModel() || DEFAULT_MODEL,
     enabled: enabledEl.checked,
-    maxConcurrent: TIER_CONCURRENCY[tierEl.value] || 2,
+    maxConcurrent: TIER_CONCURRENCY[tierEl.value] ?? 1,
   };
   await chrome.storage.local.set({ ub_settings: settings });
 }

@@ -18,7 +18,7 @@
   "use strict";
 
   const MIN_CHARS = 30; // below this there is nothing worth summarizing
-  const DEFAULT_CONCURRENCY = 2; // simultaneous Gemini requests (paid tier)
+  const DEFAULT_CONCURRENCY = 1; // simultaneous Gemini requests (free tier default)
   const SCAN_DEBOUNCE_MS = 400;
   const CACHE_MAX_ENTRIES = 800;
   const VIEWPORT_MARGIN = "400px 0px"; // start slightly before a post scrolls in

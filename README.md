@@ -100,9 +100,9 @@ If summaries are too soft, don't write "be more concise" — the model will igno
 
 ## Models and money
 
-Pick from the dropdown in Settings. Each entry shows standard paid-tier pricing per 1M tokens and whether it's on the free tier. Default is `gemini-3.8-flash`, which is a lot of model for a job that's basically "read this and get to the point."
+Pick from the dropdown in Settings. Each entry shows standard paid-tier pricing per 1M tokens and whether it's on the free tier. Default is `gemini-3.5-flash-lite` — the cheapest thing in the list and, for a job that's basically "read this and get to the point," entirely sufficient. You'd be paying roughly ten times more on `gemini-3.8-flash` for a marginal gain in wit.
 
-Want to be cheap? `gemini-3.5-flash-lite` costs about a tenth and is plenty. Want to be expensive for no reason? The Pro models are in the list. Summarizing 140 characters is not a reasoning-heavy task, so the extension tells Gemini 3.x to think at `thinkingLevel: "low"`. Thinking tokens are billed as output tokens, and we're not paying for the model to ponder your feed.
+Want to spend more anyway? The Pro models are in the list, priced accordingly. Summarizing 140 characters is not a reasoning-heavy task, so the extension tells Gemini 3.x to think at `thinkingLevel: "low"`. Thinking tokens are billed as output tokens, and we're not paying the model to ponder your feed.
 
 Older models get `temperature` instead. The extension works out which config your model wants; if it guesses wrong, it drops the offending field and retries.
 
@@ -110,7 +110,7 @@ Older models get `temperature` instead. The extension works out which config you
 
 ## Patience vs. speed (and what to do when it dies)
 
-Settings has a **Gemini plan** switch. Free tier summarizes **one post at a time**; paid tier does **two**. The free tier's rate limits are tight enough that being polite is the difference between "works" and "429s all afternoon". If you're on a billing project, turn it up and the feed fills in twice as fast.
+Settings has a **Gemini plan** switch, and it defaults to the cautious end: **free tier, one post at a time**. Paid tier bumps it to two. The free tier's rate limits are tight enough that being polite is the difference between "works" and "429s all afternoon". If you're on a billing project, turn it up and the feed fills in twice as fast.
 
 And when a request does fall over — rate limit, flaky wifi, a key you pasted with a trailing space — the error card grows a **retry** button. It re-queues that one post, clears the "no key" lockout in case you just fixed it, and has another go. No reloading, no re-scrolling, and none of the dozen posts that were already fine get re-summarized.
 

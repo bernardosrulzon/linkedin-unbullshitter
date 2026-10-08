@@ -5,7 +5,7 @@
 // the host permission declared in the manifest.
 
 const API = "https://generativelanguage.googleapis.com/v1beta/models";
-const DEFAULT_MODEL = "gemini-3.8-flash";
+const DEFAULT_MODEL = "gemini-3.5-flash-lite";
 const MAX_SUMMARY_CHARS = 140;
 const MAX_TEXT_CHARS = 6000;
 const MAX_ATTEMPTS = 4;
