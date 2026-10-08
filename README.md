@@ -1,26 +1,18 @@
 <div align="center">
 
-<img src="icons/logo.png" width="128" alt="Unbullshitter" />
+<img src="docs/mockup.webp" width="560" alt="A LinkedIn post compressed by Unbullshitter, with the original text left below it" />
 
 # Unbullshitter
 
-**Your LinkedIn feed, with the waffle removed.**
+**A Google Chrome extension that replaces LinkedIn posts with a one-line summary.**
 
 </div>
 
 ---
 
-LinkedIn is the one place where a person can write six paragraphs and say nothing — and get applauded for it. Unbullshitter reads each post, asks Google's Gemini "so what?", and replaces the whole thing with a one-line summary and an honest verdict.
+LinkedIn is the one place where a person can write six paragraphs and say nothing — and get applauded for it. Unbullshitter reads each post, asks Google's Gemini "so what?", and swaps the whole thing for a short summary and an honest verdict.
 
 A real post? You get the point. Pure bait? It says so, and shows you nothing else.
-
-| The badge | What it means |
-| --- | --- |
-| `insight · high substance` | Actually useful. |
-| `announcement · some substance` | A thing happened. |
-| `personal · low substance` | Someone's personal news. Good for them. |
-| `story · low substance` | A story with no point. |
-| `engagement bait · no substance` | "Agree?" — No. |
 
 ## Install (5 minutes, no coding required)
 
