@@ -81,8 +81,6 @@ The "substance" field. This is a professional network, so generic filler is "low
 
 Signals of low substance: tidy list-shaped prose with balanced clauses and no real specifics; "it is not X, it is Y" constructions; a dramatic hook followed by an obvious payoff; borrowed authority with no first-hand detail; congratulating; reposting without adding anything.
 
-When you are torn between two levels, choose the lower one.
-
 The "kind" field — the dominant type of post. When two seem to fit, use this order of precedence:
 
 1. "promo" — selling a product, service, course, or the author's own offering.
