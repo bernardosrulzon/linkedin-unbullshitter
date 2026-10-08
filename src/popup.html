@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Unbullshitter</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Unbullshitter</h1>
+      <p id="sub" class="sub">Loading…</p>
+    </header>
+
+    <label class="switch">
+      <input id="enabled" type="checkbox" />
+      <span>Compress posts</span>
+    </label>
+
+    <div class="diag">
+      <div class="diag-head">
+        <span>Diagnostics</span>
+        <button id="refresh" class="mini" type="button">Refresh</button>
+      </div>
+      <dl id="diagGrid" class="diag-grid"></dl>
+      <p id="diagError" class="diag-error"></p>
+    </div>
+
+    <div class="row">
+      <button id="reload" class="ghost" type="button">Reload page</button>
+      <button id="settings" class="link" type="button">Settings</button>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

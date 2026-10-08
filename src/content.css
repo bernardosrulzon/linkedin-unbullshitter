@@ -1,0 +1,182 @@
+/* LinkedIn Unbullshitter — injected summary card. */
+
+/* Hidden originals and the commentary container use data attributes rather than
+   classes or inline styles: LinkedIn's React re-renders rewrite className and
+   style (which wipes anything we add there) but never touches data-* attributes
+   it didn't set itself. */
+html [data-ub-host] {
+  display: block !important;
+  -webkit-line-clamp: unset !important;
+  -webkit-box-orient: unset !important;
+  overflow: visible !important;
+  max-height: none !important;
+  height: auto !important;
+  white-space: normal !important;
+}
+
+/* Declared after [data-ub-host] on purpose: both set display with !important, so
+   if an element ever carries both attributes, hiding must win. */
+html [data-ub-hidden] {
+  display: none !important;
+}
+
+/* ---------------------------------------------------------------------------
+   Card. Colours are LinkedIn's design tokens, selected by data-ub-theme which
+   the content script reads from LinkedIn's own theme--light / theme--dark class.
+   --------------------------------------------------------------------------- */
+
+.ub-summary {
+  /* Light tokens */
+  --ub-bg: #f4f2ee;
+  --ub-text: rgba(0, 0, 0, 0.9);
+  --ub-muted: rgba(0, 0, 0, 0.6);
+  --ub-border: rgba(0, 0, 0, 0.08);
+  --ub-link: #0a66c2;
+  --ub-accent: #6e6e6e;
+
+  display: block;
+  box-sizing: border-box;
+  max-width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ub-text);
+  background: var(--ub-bg);
+  border: 1px solid var(--ub-border);
+  border-left: 3px solid var(--ub-accent);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 6px 0 10px;
+}
+
+.ub-summary[data-ub-theme="dark"] {
+  /* Dark tokens */
+  --ub-bg: #1b1f23;
+  --ub-text: rgba(255, 255, 255, 0.9);
+  --ub-muted: rgba(255, 255, 255, 0.6);
+  --ub-border: rgba(255, 255, 255, 0.16);
+  --ub-link: #70b5f9;
+  --ub-accent: #9a9a9a;
+}
+
+/* Substance accents — LinkedIn semantic colours, lightened for dark surfaces. */
+.ub-summary[data-substance="high"] {
+  --ub-accent: #01754f;
+}
+.ub-summary[data-substance="medium"] {
+  --ub-accent: #915907;
+}
+.ub-summary[data-substance="low"] {
+  --ub-accent: #b24020;
+}
+.ub-summary[data-substance="none"] {
+  --ub-accent: #6e6e6e;
+}
+
+.ub-summary[data-ub-theme="dark"][data-substance="high"] {
+  --ub-accent: #5cbf8f;
+}
+.ub-summary[data-ub-theme="dark"][data-substance="medium"] {
+  --ub-accent: #e0b44c;
+}
+.ub-summary[data-ub-theme="dark"][data-substance="low"] {
+  --ub-accent: #e0876a;
+}
+.ub-summary[data-ub-theme="dark"][data-substance="none"] {
+  --ub-accent: #9a9a9a;
+}
+
+.ub-summary[data-state="loading"] {
+  color: var(--ub-muted);
+  font-style: italic;
+}
+
+.ub-summary[data-state="error"] {
+  color: #b24020;
+  border-left-color: #b24020;
+  font-size: 13px;
+}
+
+.ub-summary[data-ub-theme="dark"][data-state="error"] {
+  color: #e0876a;
+  border-left-color: #e0876a;
+}
+
+/* ---------------------------------------------------------------------------
+   Spinner
+   --------------------------------------------------------------------------- */
+
+.ub-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ub-spinner {
+  flex: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: ub-spin 0.7s linear infinite;
+}
+
+@keyframes ub-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ub-spinner {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Content
+   --------------------------------------------------------------------------- */
+
+.ub-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.ub-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ub-accent);
+}
+
+.ub-badge {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ub-muted);
+}
+
+.ub-text {
+  color: var(--ub-text);
+  font-weight: 500;
+}
+
+.ub-toggle {
+  margin-top: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ub-link);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ub-toggle:hover {
+  text-decoration: underline;
+}

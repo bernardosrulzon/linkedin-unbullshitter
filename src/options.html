@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Unbullshitter — Settings</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <h1>Unbullshitter</h1>
+      <p class="lede">
+        Replaces LinkedIn posts with a ruthless 140-character summary. You bring your own
+        Gemini API key; nothing is proxied through anyone else's server.
+      </p>
+
+      <section class="card">
+        <label class="label" for="apiKey">Gemini API key</label>
+        <div class="row">
+          <input
+            id="apiKey"
+            type="password"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="AIza…"
+          />
+          <button id="reveal" class="ghost" type="button" aria-label="Show key">Show</button>
+        </div>
+        <p class="hint">
+          Get one free at
+          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer"
+            >aistudio.google.com/apikey</a
+          >. Stored locally in this browser only.
+        </p>
+      </section>
+
+      <section class="card">
+        <label class="label" for="modelSelect">Model</label>
+        <select id="modelSelect"></select>
+        <input
+          id="modelCustom"
+          type="text"
+          spellcheck="false"
+          placeholder="gemini-3.8-flash"
+          hidden
+        />
+        <p id="modelDetail" class="hint"></p>
+        <p class="hint">
+          Prices are Google's standard paid tier, per 1M tokens. Models marked
+          <strong>free tier</strong> work without billing — but on the free tier Google may use
+          your input to improve its products. Paid-tier input is not used.
+        </p>
+        <button id="test" class="ghost" type="button">Test connection</button>
+        <span id="testResult" class="status" role="status"></span>
+      </section>
+
+      <section class="card">
+        <label class="switch">
+          <input id="enabled" type="checkbox" />
+          <span>Enabled on LinkedIn</span>
+        </label>
+        <p class="hint">Turn off to instantly restore the original posts.</p>
+      </section>
+
+      <div class="actions">
+        <button id="save" class="primary" type="button">Save</button>
+        <span id="saveResult" class="status" role="status"></span>
+      </div>
+    </main>
+
+    <script src="options.js"></script>
+  </body>
+</html>
