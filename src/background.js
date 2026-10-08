@@ -6,7 +6,7 @@
 
 const API = "https://generativelanguage.googleapis.com/v1beta/models";
 const DEFAULT_MODEL = "gemini-3.5-flash-lite";
-const MAX_SUMMARY_CHARS = 140;
+const MAX_SUMMARY_CHARS = 160; // hard cap before truncating; the model is asked for 140
 const MAX_TEXT_CHARS = 6000;
 const MAX_ATTEMPTS = 4;
 const REQUEST_TIMEOUT_MS = 20000;
